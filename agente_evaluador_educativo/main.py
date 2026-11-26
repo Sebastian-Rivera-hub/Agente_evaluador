@@ -35,6 +35,7 @@ MAX_CSV_BYTES = 5 * 1024 * 1024  # 5 MB
 MAX_CSV_ROWS = 50000
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 DEFAULT_MODEL = "meta/llama-3.3-70b-instruct"
+FALLBACK_MODEL = "nvidia/nvidia-nemotron-nano-9b-v2"
 
 SYSTEM_PROMPT = (
     "Eres un evaluador educativo de contenido financiero. Respondes siempre en español. "
@@ -56,31 +57,70 @@ def check_token(x_api_key: str | None):
 # --------------------------------------------------------------------------- #
 # Cliente LLM (NVIDIA NIM, compatible con la API de OpenAI)
 # --------------------------------------------------------------------------- #
+
 def call_llm(user_prompt: str) -> tuple[str, str]:
     api_key = os.getenv("NVIDIA_API_KEY")
+
     if not api_key:
-        raise HTTPException(status_code=503, detail="Falta configurar NVIDIA_API_KEY en Render.")
-
-    model = os.getenv("NVIDIA_MODEL", DEFAULT_MODEL)
-    client = OpenAI(base_url=NVIDIA_BASE_URL, api_key=api_key, timeout=90)
-
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            temperature=0.2,
-            max_tokens=1800,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-        )
-        return model, response.choices[0].message.content
-    except Exception as exc:  # se registra el tipo de error, nunca la clave
-        logger.exception("Fallo al llamar a NVIDIA: %s", type(exc).__name__)
         raise HTTPException(
-            status_code=502,
-            detail=f"No se pudo completar el análisis con NVIDIA ({type(exc).__name__}). Revisa los logs de Render.",
+            status_code=503,
+            detail="Falta configurar NVIDIA_API_KEY en Render."
         )
+
+    # Modelo principal y modelo de respaldo
+    primary_model = os.getenv("NVIDIA_MODEL", DEFAULT_MODEL)
+    fallback_model = os.getenv("NVIDIA_FALLBACK_MODEL", FALLBACK_MODEL)
+
+    # Evita intentar dos veces el mismo modelo
+    models = list(dict.fromkeys([primary_model, fallback_model]))
+
+    client = OpenAI(
+        base_url=NVIDIA_BASE_URL,
+        api_key=api_key,
+        timeout=45
+    )
+
+    last_error = None
+
+    for model in models:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                temperature=0.2,
+                max_tokens=1400,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt}
+                ]
+            )
+
+            result = response.choices[0].message.content
+
+            if not result or not result.strip():
+                raise ValueError("El modelo devolvió una respuesta vacía.")
+
+            logger.info("Evaluación completada con el modelo: %s", model)
+
+            return model, result
+
+        except Exception as exc:
+            last_error = exc
+            logger.warning(
+                "Falló el modelo %s: %s",
+                model,
+                type(exc).__name__
+            )
+
+    logger.exception(
+        "Fallaron todos los modelos de NVIDIA: %s",
+        type(last_error).__name__ if last_error else "Error desconocido"
+    )
+
+    raise HTTPException(
+        status_code=502,
+        detail="No se pudo completar la evaluación. Revisa la disponibilidad de los modelos en NVIDIA y los logs de Render."
+    )
+
 
 
 # --------------------------------------------------------------------------- #
