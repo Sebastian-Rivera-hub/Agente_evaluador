@@ -149,22 +149,18 @@ No afirmes que el material es correcto si faltan datos para comprobarlo. Disting
 errores verificables, omisiones y aspectos que requieren revisión de una persona experta.
 
 Evalúa:
-1. Claridad de las explicaciones y adecuación para principiantes.
-2. Exactitud conceptual general (derecho, no obligación; precio de ejercicio; prima;
-   vencimiento; pérdida potencial de la prima para quien compra; riesgos para quien vende).
-3. Si explica riesgos, incertidumbre y posibilidad de pérdida.
-4. Si diferencia ejemplos hipotéticos de resultados reales.
-5. Si evita promesas de rentabilidad o afirmaciones engañosas.
-6. Qué conceptos importantes faltan y qué partes son ambiguas.
+1. Claridad y comprensión: explicaciones sencillas, ordenadas y adecuadas para principiantes.(3puntos)
+2. Exactitud conceptual: explica correctamente el derecho, no la obligación; precio de ejercicio, prima y vencimiento.(5puntos)
+3. Comprensión de pérdidas y riesgos: explica la posible pérdida de la prima para quien compra y los riesgos para quien vende.(4puntos)
+4. Riesgos e incertidumbre: reconoce que los resultados no están garantizados y que existe posibilidad de pérdida. (3puntos)
+5. Ejemplos y situaciones: diferencia claramente los ejemplos hipotéticos de los resultados reales.(2puntos)
+6. Completitud y precisión: identifica conceptos importantes que faltan, explicaciones ambiguas o información que necesita aclaración.(3puntos)
 
 Responde con estas secciones:
 - Resumen general
-- Puntuación educativa de 0 a 100 (aclara que es una estimación orientativa)
+- Puntuación educativa de 0 a 20 (aclara que es una estimación orientativa)
 - Fortalezas
-- Problemas o afirmaciones que requieren verificación
-- Riesgos y advertencias que faltan
 - Mejoras educativas sugeridas
-- Limitaciones del análisis
 
 Si el texto es insuficiente, indícalo y no inventes información.
 
