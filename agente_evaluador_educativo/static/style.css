@@ -1,52 +1,258 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #f1f5f9;
-    margin: 0;
-    padding: 30px;
-    color: #1e293b;
+
+:root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #172033;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --accent: #315eea;
+    --accent-hover: #2449c7;
+    --good: #16a36a;
+    --mid: #d99018;
+    --bad: #dc4545;
 }
 
-.container {
-    max-width: 750px;
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #101827;
+        --card: #1b2638;
+        --text: #f1f5f9;
+        --muted: #a3afc2;
+        --line: #334155;
+        --accent: #6385ff;
+        --accent-hover: #829cff;
+        --good: #35c98a;
+        --mid: #f5b942;
+        --bad: #ff7373;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 Arial, sans-serif;
+}
+
+main {
+    max-width: 950px;
     margin: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 3px 10px #0002;
+    padding: 35px 18px 60px;
 }
 
 h1 {
-    color: #2563eb;
+    font-size: 2rem;
     text-align: center;
+    margin-bottom: 5px;
+    color: var(--accent);
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin: 0 0 16px;
+}
+
+h4 {
+    margin: 16px 0 5px;
+}
+
+.sub {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 30px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.04);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: end;
+}
+
+.field {
+    flex: 1 1 260px;
+}
+
+label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+input[type="file"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
 }
 
 textarea {
-    width: 100%;
-    height: 150px;
-    padding: 10px;
-    box-sizing: border-box;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    min-height: 100px;
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
 }
 
 button {
-    background: #2563eb;
+    background: var(--accent);
     color: white;
     border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
+    border-radius: 9px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-    margin-top: 12px;
+    transition: 0.2s;
 }
 
 button:hover {
-    background: #1d4ed8;
+    background: var(--accent-hover);
+    transform: translateY(-1px);
 }
 
-#resultado {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f8fafc;
+button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+    transform: none;
+}
+
+.scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+
+th {
+    color: var(--muted);
+    font-weight: bold;
+}
+
+td.num {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.score {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.big {
+    font-size: 3.5rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.pill {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: white;
+}
+
+.bar {
+    background: var(--line);
     border-radius: 8px;
+    height: 9px;
+    min-width: 90px;
+    overflow: hidden;
+}
+
+.bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.err {
+    color: var(--bad);
+    font-weight: bold;
+}
+
+.na {
+    color: var(--muted);
+    font-style: italic;
+}
+
+ul {
+    margin: 8px 0 0;
+    padding-left: 22px;
+}
+
+li {
+    margin-bottom: 7px;
+}
+
+.llm {
     white-space: pre-wrap;
+    line-height: 1.7;
+}
+
+.hidden {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    main {
+        padding: 22px 12px 40px;
+    }
+
+    h1 {
+        font-size: 1.55rem;
+    }
+
+    .card {
+        padding: 17px;
+    }
+
+    .big {
+        font-size: 2.8rem;
+    }
+
+    button {
+        width: 100%;
+    }
 }
