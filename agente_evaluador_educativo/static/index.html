@@ -4,54 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agente Evaluador · Opciones CALL</title>
+<link rel="stylesheet" href="/static/style.css">
 <style>
-  :root {
-    --bg: #f6f7f9; --card: #ffffff; --text: #1c2430; --muted: #5d6877;
-    --line: #e1e5eb; --accent: #2457d6; --good: #1f9d55; --mid: #d98a00; --bad: #d23b3b;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #12161c; --card: #1a2029; --text: #e8ecf2; --muted: #98a3b3;
-      --line: #2a3340; --accent: #6c93ff; --good: #3ecf80; --mid: #f0b429; --bad: #ff6b6b;
-    }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  h2 { font-size: 1.15rem; margin: 0 0 12px; }
-  h4 { margin: 16px 0 4px; font-size: 1rem; }
-  .sub { color: var(--muted); margin: 0 0 24px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-          padding: 20px; margin-bottom: 20px; }
-  .scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; }
-  td.num { white-space: nowrap; text-align: right; }
-  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
-  label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
-  input[type=file], input[type=password], textarea {
-    width: 100%; padding: 9px; border: 1px solid var(--line); border-radius: 8px;
-    background: var(--bg); color: var(--text); font: inherit; }
-  textarea { min-height: 70px; resize: vertical; }
-  .field { flex: 1 1 260px; }
-  button { background: var(--accent); color: #fff; border: 0; border-radius: 8px;
-           padding: 11px 20px; font: inherit; font-weight: 600; cursor: pointer; }
-  button:disabled { opacity: .55; cursor: wait; }
-  .score { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .big { font-size: 3.2rem; font-weight: 700; line-height: 1; }
-  .pill { display: inline-block; padding: 3px 12px; border-radius: 999px; font-weight: 600;
-          font-size: .9rem; color: #fff; }
-  .bar { background: var(--line); border-radius: 6px; height: 8px; min-width: 90px; overflow: hidden; }
-  .bar > span { display: block; height: 100%; }
-  .muted { color: var(--muted); }
-  .err { color: var(--bad); font-weight: 600; }
-  .na { color: var(--muted); font-style: italic; }
-  ul { margin: 6px 0 0; padding-left: 20px; }
-  .llm { white-space: pre-wrap; }
-  .hidden { display: none; }
+
 </style>
 </head>
 <body>
