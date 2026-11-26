@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agente Evaluador · Opciones CALL</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1c2430; --muted: #5d6877;
+    --line: #e1e5eb; --accent: #2457d6; --good: #1f9d55; --mid: #d98a00; --bad: #d23b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161c; --card: #1a2029; --text: #e8ecf2; --muted: #98a3b3;
+      --line: #2a3340; --accent: #6c93ff; --good: #3ecf80; --mid: #f0b429; --bad: #ff6b6b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; }
+  h4 { margin: 16px 0 4px; font-size: 1rem; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+          padding: 20px; margin-bottom: 20px; }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num { white-space: nowrap; text-align: right; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+  label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+  input[type=file], input[type=password], textarea {
+    width: 100%; padding: 9px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--text); font: inherit; }
+  textarea { min-height: 70px; resize: vertical; }
+  .field { flex: 1 1 260px; }
+  button { background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+           padding: 11px 20px; font: inherit; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .55; cursor: wait; }
+  .score { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .big { font-size: 3.2rem; font-weight: 700; line-height: 1; }
+  .pill { display: inline-block; padding: 3px 12px; border-radius: 999px; font-weight: 600;
+          font-size: .9rem; color: #fff; }
+  .bar { background: var(--line); border-radius: 6px; height: 8px; min-width: 90px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; }
+  .muted { color: var(--muted); }
+  .err { color: var(--bad); font-weight: 600; }
+  .na { color: var(--muted); font-style: italic; }
+  ul { margin: 6px 0 0; padding-left: 20px; }
+  .llm { white-space: pre-wrap; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Agente Evaluador · Opciones CALL</h1>
+  <p class="sub">Sube el CSV que usa tu bot y obtén una calificación con criterios claros y una explicación educativa.
+     No ofrece recomendaciones de inversión.</p>
 
+  <section class="card">
+    <h2>1. Criterios de calificación (100 puntos)</h2>
+    <p class="muted" id="verdictRule">Cargando criterios…</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Criterio</th><th>Cómo se puntúa</th><th>Máx.</th></tr></thead>
+        <tbody id="rubricBody"></tbody>
+      </table>
+    </div>
+    <p class="muted" style="margin-bottom:0">La nota es <strong>calculada con reglas fijas</strong>, por lo que es la misma cada vez
+       que subas el mismo archivo. La IA solo explica el resultado.</p>
+  </section>
+
+  <section class="card">
+    <h2>2. Evaluar un CSV</h2>
+    <div class="row">
+      <div class="field">
+        <label for="file">Archivo CSV (máx. 5 MB)</label>
+        <input type="file" id="file" accept=".csv,text/csv">
+      </div>
+      <div class="field">
+        <label for="token">Token de acceso (si tu servicio lo exige)</label>
+        <input type="password" id="token" placeholder="opcional" autocomplete="off">
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <label for="context">Texto que muestra la app al cargar el CSV (opcional)</label>
+      <textarea id="context" placeholder="Pega aquí lo que ves en la app de Streamlit después de subir el CSV"></textarea>
+    </div>
+    <div style="margin-top:14px">
+      <button id="go">Evaluar</button>
+      <span id="status" class="muted" style="margin-left:12px"></span>
+    </div>
+    <p class="muted" style="margin-bottom:0">Si el servicio estaba inactivo, la primera evaluación puede tardar cerca de un minuto.</p>
+  </section>
+
+  <section id="result" class="hidden">
+    <div class="card">
+      <h2>Resultado</h2>
+      <div class="score">
+        <div class="big" id="total"></div>
+        <div><span class="pill" id="verdict"></span>
+          <div class="muted" id="verdictNote" style="margin-top:6px"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Desglose por criterio</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Criterio</th><th>Detalle</th><th>Puntos</th><th></th></tr></thead>
+          <tbody id="breakdown"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="warnCard">
+      <h2>Advertencias automáticas</h2>
+      <ul id="warns"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Explicación de la IA</h2>
+      <div class="llm" id="llm"></div>
+      <p class="muted" id="notice" style="margin-bottom:0"></p>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const md = s => esc(s)
+  .replace(/^#{1,4}\s*(.+)$/gm, '<h4>$1</h4>')
+  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+const color = pct => pct >= 75 ? 'var(--good)' : pct >= 50 ? 'var(--mid)' : 'var(--bad)';
+
+async function loadCriteria() {
+  try {
+    const r = await fetch('/criteria');
+    const d = await r.json();
+    $('verdictRule').textContent = 'Veredicto: ' + d.regla_veredicto;
+    $('rubricBody').innerHTML = d.criterios.map(c =>
+      `<tr><td>${esc(c.nombre)}</td><td>${esc(c.descripcion)}</td><td class="num">${c.max}</td></tr>`).join('');
+  } catch (e) {
+    $('verdictRule').textContent = 'No se pudieron cargar los criterios.';
+  }
+}
+
+function showResult(d) {
+  const cal = d.reporte_automatico.calificacion;
+  const c = color(cal.total);
+  $('total').textContent = cal.total + '/100';
+  $('total').style.color = c;
+  $('verdict').textContent = cal.veredicto.toUpperCase();
+  $('verdict').style.background = c;
+  $('verdictNote').textContent = cal.regla_veredicto;
+
+  $('breakdown').innerHTML = cal.criterios.map(k => {
+    if (!k.aplica) {
+      return `<tr><td>${esc(k.nombre)}</td><td class="na">${esc(k.detalle)} (no aplica, no cuenta en la nota)</td><td class="num">—</td><td></td></tr>`;
+    }
+    const pct = (k.puntos / k.maximo) * 100;
+    return `<tr><td>${esc(k.nombre)}</td><td>${esc(k.detalle)}</td>
+      <td class="num">${k.puntos} / ${k.maximo}</td>
+      <td><div class="bar"><span style="width:${pct}%;background:${color(pct)}"></span></div></td></tr>`;
+  }).join('');
+
+  const w = d.reporte_automatico.advertencias_automaticas;
+  $('warnCard').classList.toggle('hidden', !w.length);
+  $('warns').innerHTML = w.map(x => `<li>${esc(x)}</li>`).join('');
+
+  $('llm').innerHTML = md(d.evaluation);
+  $('notice').textContent = d.notice + ' Modelo: ' + d.model;
+  $('result').classList.remove('hidden');
+  $('result').scrollIntoView({behavior: 'smooth'});
+}
+
+$('go').addEventListener('click', async () => {
+  const f = $('file').files[0];
+  const status = $('status');
+  if (!f) { status.innerHTML = '<span class="err">Selecciona un archivo CSV.</span>'; return; }
+  const fd = new FormData();
+  fd.append('file', f);
+  fd.append('context', $('context').value);
+  const headers = {};
+  if ($('token').value) headers['x-api-key'] = $('token').value;
+
+  $('go').disabled = true;
+  status.textContent = 'Evaluando… (puede tardar)';
+  try {
+    const r = await fetch('/evaluate-csv', { method: 'POST', body: fd, headers });
+    const d = await r.json();
+    if (!r.ok) throw new Error(typeof d.detail === 'string' ? d.detail : 'Error ' + r.status);
+    status.textContent = '';
+    showResult(d);
+  } catch (e) {
+    status.innerHTML = '<span class="err">' + esc(e.message) + '</span>';
+  } finally {
+    $('go').disabled = false;
+  }
+});
+
+loadCriteria();
+</script>
+</body>
+</html>
